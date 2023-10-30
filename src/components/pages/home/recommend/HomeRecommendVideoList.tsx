@@ -13,14 +13,15 @@ const HomeRecommendVideoList = () => {
   if (isLoading) {
     return <>Loading</>
   }
+
   return (
     <div>
-      {items.map((item) => (
-        <div className="border-b border-l-stone-300">
-          <HomeRecommendVideoListItem
-            key={`recommend-video-item-${item.id}`}
-            item={item}
-          />
+      {items.map((item, index: number) => (
+        <div
+          className="border-b border-l-stone-300"
+          key={`recommend-video-item-${index}`}
+        >
+          <HomeRecommendVideoListItem item={item} />
         </div>
       ))}
     </div>

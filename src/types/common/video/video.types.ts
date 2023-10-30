@@ -1,5 +1,7 @@
 export interface IVideoEntity {
-  id: number
   title: string
+  sources: string
+  subtitle: string
+  thumb: string
   description: string
 }

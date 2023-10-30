@@ -6,7 +6,9 @@ import HomeRecommendVideoList from '../components/pages/home/recommend/HomeRecom
 const HomePage = () => {
   return (
     <HomePageTemplate
-      Video={<VideoPlayer />}
+      Video={
+        <VideoPlayer videoSrc="http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4" />
+      }
       Banner={<HomeBannerList />}
       List={<HomeRecommendVideoList />}
     />
