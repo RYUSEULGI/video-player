@@ -37,7 +37,6 @@ const VideoPlayer: FC<Props> = ({ videoSrc }) => {
     videoElement.addEventListener('timeupdate', updateVideoTime)
 
     setIsPlaying(true)
-    videoElement.play()
     videoElement.muted = false
 
     return () => {
@@ -96,6 +95,7 @@ const VideoPlayer: FC<Props> = ({ videoSrc }) => {
               loop
               muted
               playsInline
+              autoPlay
             >
               <source src={videoSrc} type="video/mp4" />
             </video>

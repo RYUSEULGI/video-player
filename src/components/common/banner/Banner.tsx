@@ -10,7 +10,7 @@ const Banner: FC<Props> = ({ banner }) => {
 
   return (
     <div
-      className="flex items-center justify-center rounded-2xl bg-slate-100 p-16"
+      className="object-contain flex-none w-full text-center rounded-2xl bg-slate-100 p-16"
       onClick={handleClick}
     >
       {banner.name}
