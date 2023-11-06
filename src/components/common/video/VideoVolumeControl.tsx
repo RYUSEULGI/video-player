@@ -1,17 +1,17 @@
 import { ChangeEvent, useCallback, useContext, useState } from 'react'
-import { VideoContext } from '../../../context/videoContent'
+import { VideoPlayerContext } from '../../../context/VideoPlayerContext'
 import VolumneIcon from '../../../icons/VolumneIcon'
 
 const VideoVolumeControl = () => {
-  const { videoElement } = useContext(VideoContext)
+  const { videoElement } = useContext(VideoPlayerContext)
 
   const [showVolume, setShowVolume] = useState(false)
+  const [isVolumeChange, setIsVolumeChange] = useState(false)
 
   const handleToggleVolume = () => {
     if (!videoElement) {
       return
     }
-
     videoElement.muted
       ? (videoElement.muted = false)
       : (videoElement.muted = true)
@@ -25,37 +25,60 @@ const VideoVolumeControl = () => {
     setShowVolume(false)
   }
 
+  const handleMouseDown = () => {
+    setIsVolumeChange(true)
+  }
+
+  const handleMouseUp = () => {
+    setIsVolumeChange(false)
+  }
+
+  const handleMouseMove = () => {
+    if (!videoElement || !isVolumeChange) {
+      return
+    }
+
+    setShowVolume(true)
+  }
+
   const handleChangeVolume = useCallback(
     (e: ChangeEvent<HTMLInputElement>) => {
       if (!videoElement) {
         return
       }
 
-      videoElement.volume = Number(e.target.value)
+      videoElement.volume = Number(e.target.value) / 100
     },
     [videoElement],
   )
 
+  if (!videoElement) {
+    return <></>
+  }
+
   return (
     <div
-      className="flex items-center gap-3"
-      onClick={handleToggleVolume}
+      className="flex items-center gap-3 cursor-pointer"
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
     >
-      <VolumneIcon mute={videoElement?.muted ?? false} />
+      <button className="text-white" onClick={handleToggleVolume}>
+        <VolumneIcon mute={videoElement.muted} />
+      </button>
+
       {showVolume && (
-        <div>
-          <input
-            className="w-100px"
-            type="range"
-            max="100"
-            min="0"
-            step="1"
-            value={videoElement?.volume ?? 0}
-            onChange={handleChangeVolume}
-          />
-        </div>
+        <input
+          className="w-100px"
+          type="range"
+          max="100"
+          min="0"
+          step="1"
+          value={videoElement.volume * 100 ?? 100}
+          onChange={handleChangeVolume}
+          onMouseDown={handleMouseDown}
+          onMouseUp={handleMouseUp}
+          onMouseMove={handleMouseMove}
+        />
       )}
     </div>
   )

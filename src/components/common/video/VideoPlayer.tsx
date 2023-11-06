@@ -1,7 +1,9 @@
 import { FC, useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import { VideoContext } from '../../../context/videoContent'
+
+import { VideoPlayerContext } from '../../../context/VideoPlayerContext'
 import VideoControlBar from './VideoControlBar'
 import VideoPlayerTemplate from './VideoPlayerTemplate'
+import VideoPlayerView from './VideoPlayerView'
 
 interface Props {
   videoSrc: string
@@ -17,32 +19,18 @@ const VideoPlayer: FC<Props> = ({ videoSrc }) => {
   const [isPlaying, setIsPlaying] = useState(true)
   const [showControls, setShowControls] = useState(false)
   const [videoTime, setVideoTime] = useState(0)
+  const [isFullScreen, setIsFullScreen] = useState(false)
 
   const currentTime = useMemo(() => videoTime, [videoTime])
-  const maxTime = videoElement?.duration ?? 0
-
-  const updateVideoTime = useCallback(() => {
-    if (!videoElement) {
-      return
-    }
-
-    setVideoTime(videoElement.currentTime)
-  }, [videoElement])
 
   const handlePlayVideo = useCallback(() => {
     if (!videoElement) {
       return
     }
 
-    videoElement.addEventListener('timeupdate', updateVideoTime)
-
     setIsPlaying(true)
-    videoElement.muted = false
-
-    return () => {
-      videoElement.removeEventListener('timeupdate', updateVideoTime)
-    }
-  }, [updateVideoTime, videoElement])
+    videoElement.play()
+  }, [videoElement])
 
   useEffect(() => {
     handlePlayVideo()
@@ -54,22 +42,20 @@ const VideoPlayer: FC<Props> = ({ videoSrc }) => {
     }
 
     setShowControls(true)
-
     setTimeout(() => {
       setShowControls(false)
     }, 3000)
   }, [showControls])
 
-  const handleClickPlay = () => {
+  const onPlay = () => {
     if (!videoElement) {
       return
     }
-
     setIsPlaying((prev) => !prev)
     isPlaying ? videoElement.pause() : videoElement.play()
   }
 
-  const handleChangeProgress = (percent: number) => {
+  const onChangeProgress = (percent: number) => {
     if (!videoElement) {
       return
     }
@@ -78,44 +64,40 @@ const VideoPlayer: FC<Props> = ({ videoSrc }) => {
       setShowControls(true)
     }
 
-    const time = maxTime * (percent / 100)
+    const time = videoElement.duration * (percent / 100)
     setVideoTime(time)
   }
 
+  const setFullScreenChange = () => {
+    setIsFullScreen((prev) => !prev)
+  }
+
+  const videoContext = {
+    videoElement,
+    videoContainerElement,
+    isFullScreen,
+    isPlaying,
+    currentTime,
+    onPlay,
+    setIsPlaying,
+    setCurrentTime: setVideoTime,
+    setFullScreenChange,
+    onChangeProgress,
+  }
+
   return (
-    <VideoContext.Provider value={{ videoElement }}>
-      <div ref={videoContainerRef} onMouseMove={handleMouseMoveVideo}>
+    <VideoPlayerContext.Provider value={videoContext}>
+      <div
+        className="relative w-1000px h-600px"
+        ref={videoContainerRef}
+        onMouseMove={handleMouseMoveVideo}
+      >
         <VideoPlayerTemplate
-          View={
-            <video
-              className="object-fill"
-              width={1000}
-              height={600}
-              ref={videoRef}
-              loop
-              muted
-              playsInline
-              autoPlay
-            >
-              <source src={videoSrc} type="video/mp4" />
-            </video>
-          }
-          Controls={
-            showControls ? (
-              <VideoControlBar
-                videoContainerElement={videoContainerElement}
-                maxTime={maxTime}
-                isPlaying={isPlaying}
-                videoCurrentTime={currentTime}
-                onPlay={handleClickPlay}
-                onChangePlaying={setIsPlaying}
-                onChangeProgress={handleChangeProgress}
-              />
-            ) : undefined
-          }
+          View={<VideoPlayerView ref={videoRef} videoSrc={videoSrc} />}
+          Controls={showControls ? <VideoControlBar /> : undefined}
         />
       </div>
-    </VideoContext.Provider>
+    </VideoPlayerContext.Provider>
   )
 }
 export default VideoPlayer
